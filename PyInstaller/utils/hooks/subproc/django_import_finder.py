@@ -33,9 +33,16 @@ from PyInstaller.utils.hooks import collect_submodules
 
 
 hiddenimports = list(settings.INSTALLED_APPS) + \
-                 list(settings.TEMPLATE_CONTEXT_PROCESSORS) + \
-                 list(settings.TEMPLATE_LOADERS) + \
                  [settings.ROOT_URLCONF]
+
+try:
+    hiddenimports += list(settings.TEMPLATE_CONTEXT_PROCESSORS) + \
+                     list(settings.TEMPLATE_LOADERS)
+
+except AttributeError:
+    # Django > 1.8
+    for template in settings.TEMPLATES:
+        hiddenimports += list(template.get("OPTIONS", {}).get('context_processors', []))
 
 
 def _remove_class(class_name):
